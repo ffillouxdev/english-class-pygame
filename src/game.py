@@ -1,24 +1,25 @@
+# src/game.py
 import pygame
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
-pygame.init()
+class Game:
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_caption("Rasberry-Fight")  # le titre
+        self.running = True
 
-# Définir les dimensions de l'écran
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Rasberry-Fight") # le titre
+    def run(self):
+        while self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
 
-running = True
-while running:
-    # Gestion des événements
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:  # Fermer la fenêtre
-            running = False
+            # Fond d'écran (si vous avez une image bg.jpg dans assets/)
+            background = pygame.image.load("assets/bg.jpg")
+            bg_rect = background.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+            self.screen.blit(background, bg_rect.topleft)
 
-    # background image
-    background = pygame.image.load('assets/bg.jpg')
-    
-    # Rafraîchir l'écran
-    pygame.display.flip()
+            pygame.display.flip()
 
-# Quitter Pygame
-pygame.quit()
+        pygame.quit()
