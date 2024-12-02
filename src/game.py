@@ -1,8 +1,10 @@
 # src/game.py
 import pygame
-from src.constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
-from src.counter import Counter
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
+from counter import Counter
 from time import sleep
+from character import *
+from healthBar import *
 
 class Game:
     def __init__(self):
@@ -12,6 +14,14 @@ class Game:
         self.running = True
         self.counter = Counter(99)
         self.clock = pygame.time.Clock()  # Initialize the clock
+
+
+        self.player1 = Character("Player 1", 200, SCREEN_HEIGHT - 100)
+        self.player2 = Character("Player 2", SCREEN_WIDTH - 250, SCREEN_HEIGHT - 100)
+
+        # Initialize health bars
+        self.player1_health_bar = HealthBar(self.player1, 50, 50, 200, 20)  # Top-left
+        self.player2_health_bar = HealthBar(self.player2, SCREEN_WIDTH - 250, 50, 200, 20)  # Top-right
 
     def run(self):
         while self.running:
@@ -35,7 +45,14 @@ class Game:
             else:
                 self.counter.reset()
 
+            # Draw health bars
+            self.player1_health_bar.draw(self.screen)
+            self.player2_health_bar.draw(self.screen)
+
             pygame.display.flip()
             self.clock.tick(FPS) 
 
         pygame.quit()
+
+Game = Game()
+Game.run()
