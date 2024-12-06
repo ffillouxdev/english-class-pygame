@@ -63,7 +63,7 @@ class Game:
                 self.frame_counter = 0
             background = self.gif_frames[self.current_frame]
             self.screen.blit(background, (0, 0))
-
+x²
             # placer le compteur en haut au milieu et le lancer jusqu'à 0
             font = pygame.font.Font(None, 74)
             text = font.render(str(self.counter.get_count()), True, (255, 255, 255))
