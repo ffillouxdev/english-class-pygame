@@ -1,10 +1,11 @@
 # src/game.py
 import pygame
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
-from counter import Counter
+from .constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
+from .counter import Counter
 from time import sleep
-from character import *
-from healthBar import *
+from .character import *
+from .healthBar import *
+
 
 class Game:
     def __init__(self):
@@ -13,15 +14,16 @@ class Game:
         pygame.display.set_caption("Rasberry-Fight")  # le titre
         self.running = True
         self.counter = Counter(99)
-        self.clock = pygame.time.Clock()  # Initialize the clock
-
+        self.clock = pygame.time.Clock()
 
         self.player1 = Character("Player 1", 200, SCREEN_HEIGHT - 100)
         self.player2 = Character("Player 2", SCREEN_WIDTH - 250, SCREEN_HEIGHT - 100)
 
         # Initialize health bars
-        self.player1_health_bar = HealthBar(self.player1, 50, 50, 200, 20)  # Top-left
-        self.player2_health_bar = HealthBar(self.player2, SCREEN_WIDTH - 250, 50, 200, 20)  # Top-right
+        self.player1_health_bar = HealthBar(self.player1, 50, 50, 200, 20)
+        self.player2_health_bar = HealthBar(
+            self.player2, SCREEN_WIDTH - 250, 50, 200, 20
+        )
 
     def run(self):
         while self.running:
@@ -30,10 +32,12 @@ class Game:
                     self.running = False
 
             # Fond d'écran (si vous avez une image bg.jpg dans assets/)
-            background = pygame.image.load("assets/bg.jpg")
-            bg_rect = background.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+            background = pygame.image.load("assets/spritesyy/bg.jpg")
+            bg_rect = background.get_rect(
+                center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+            )
             self.screen.blit(background, bg_rect.topleft)
-            
+
             # placer le compteur en haut au milieu et le lancer jusqu'à 0
             font = pygame.font.Font(None, 74)
             text = font.render(str(self.counter.get_count()), True, (255, 255, 255))
@@ -50,9 +54,6 @@ class Game:
             self.player2_health_bar.draw(self.screen)
 
             pygame.display.flip()
-            self.clock.tick(FPS) 
+            self.clock.tick(FPS)
 
         pygame.quit()
-
-Game = Game()
-Game.run()
