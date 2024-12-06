@@ -32,7 +32,7 @@ class Game:
                     self.running = False
 
             # Fond d'écran (si vous avez une image bg.jpg dans assets/)
-            background = pygame.image.load("assets/spritesyy/bg.jpg")
+            background = pygame.image.load("assets/sprites/bg.jpg")
             bg_rect = background.get_rect(
                 center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
             )
