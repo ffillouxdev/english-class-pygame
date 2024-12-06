@@ -8,12 +8,18 @@ from .healthBar import *
 
 class Game:
     def __init__(self):
+
         pygame.init()
+        
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        
         pygame.display.set_caption("Rasberry-Fight")
+        
         self.running = True
         self.counter = Counter(99)
         self.clock = pygame.time.Clock()
+
+
 
         self.player1 = Character("Player 1", 200, SCREEN_HEIGHT - 100)
         self.player2 = Character("Player 2", SCREEN_WIDTH - 250, SCREEN_HEIGHT - 100)
@@ -23,9 +29,7 @@ class Game:
         self.player2_health_bar = HealthBar(self.player2, SCREEN_WIDTH - 250, 50, 200, 20)
 
         # Load GIF frames
-        self.gif_frames, self.gif_size = self.load_gif_frames(
-            "./assets/sprites/BackGround.gif"
-        )
+        self.gif_frames, self.gif_size = self.load_gif_frames("./assets/sprites/BackGround.gif")
         self.current_frame = 0
         self.last_frame_update = pygame.time.get_ticks()  # Tracks the last frame update time
         self.frame_delay = 1000 // 10  # GIF frame rate (10 FPS)
@@ -40,22 +44,30 @@ class Game:
         frames = []
         try:
             while True:
-                # Ensure the frame is in a supported mode
                 frame = gif.copy()
+
                 if frame.mode != "RGB":
                     frame = frame.convert("RGB")
+
+                # Scale the frame to fit the screen size
+                frame = frame.resize((SCREEN_WIDTH, SCREEN_HEIGHT), Image.Resampling.LANCZOS)
                 frame_surface = pygame.image.fromstring(
                     frame.tobytes(), frame.size, frame.mode
                 )
                 frames.append(frame_surface)
+
                 gif.seek(gif.tell() + 1)  # Move to the next frame
         except EOFError:
             pass  # End of GIF
+
         return frames, gif.size
+
 
     def update_gif_frame(self):
         """Update the current GIF frame based on timing."""
+
         current_time = pygame.time.get_ticks()
+        
         if current_time - self.last_frame_update >= self.frame_delay:
             self.current_frame = (self.current_frame + 1) % len(self.gif_frames)
             self.last_frame_update = current_time
