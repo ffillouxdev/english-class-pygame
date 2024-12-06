@@ -55,7 +55,7 @@ info_alpha_direction = 5
 # Fonction pour passer à la prochaine page
 def new_page():
     pygame.quit()  # Ferme la fenêtre actuelle
-    os.system("python street_fighter.py")  # Exécute le fichier street_fighter.py
+    os.system(r'python "C:\Users\bille\OneDrive\Documents\english-class-pygame\src\game.py"')# Exécute le fichier street_fighter.py
     sys.exit()
 
 # Définir le bouton START

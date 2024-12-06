@@ -30,10 +30,11 @@ class Game:
                     self.running = False
 
             # Fond d'écran (si vous avez une image bg.jpg dans assets/)
-            background = pygame.image.load("assets/bg.jpg")
+            background = pygame.image.load(r"C:\Users\bille\OneDrive\Documents\english-class-pygame\assets\bg.jpg")
+
             bg_rect = background.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
             self.screen.blit(background, bg_rect.topleft)
-            
+
             # placer le compteur en haut au milieu et le lancer jusqu'à 0
             font = pygame.font.Font(None, 74)
             text = font.render(str(self.counter.get_count()), True, (255, 255, 255))
@@ -50,7 +51,7 @@ class Game:
             self.player2_health_bar.draw(self.screen)
 
             pygame.display.flip()
-            self.clock.tick(FPS) 
+            self.clock.tick(FPS)
 
         pygame.quit()
 
