@@ -8,49 +8,40 @@ from character import Character
 import pygame
 
 class Action:
-    def __init__(self, character: Character, action):
+    def __init__(self, character: Character):
         self.char = character
         self.action = action
-    
-    def keyHandling(self):
-        if self.action == "up":
-            self.jump()
-        elif self.action == "down":
-            self.crouch()
-        elif self.action == "left":
-            self.forward()
-        elif self.action == "right":
-            self.backward()
 
     def forward(self):
         self.char.axeXpos += FORWARD_SPEED
-        self.char.state = ""
         print(f"{self.char.name} has moved forward")
+        self.char.state = "walk"
 
     def backward(self):
         self.char.axeXpos -= BACKWARD_SPEED
         print(f"{self.char.name} has moved backward")
+        self.char.state = "walk"
 
     def jump(self):
-        if self.char.state != "jumping":  # Prevent repeated jumps
-            self.char.state = "jumping"
+        if self.char.state != "jump":  # Prevent repeated jumps
+            self.char.state = "jump"
             self.char.update_hitbox()
             self.char.axeYpos -= JUMP_HEIGHT  # In most 2D games, Y decreases upwards
             print(f"{self.char.name} jumps!")
 
     def crouch(self):
-        if self.char.state != "crouching":  # Prevent repeated crouch states
-            self.char.state = "crouching"
+        if self.char.state != "crouch":  # Prevent repeated crouch states
+            self.char.state = "crouch"
             self.char.update_hitbox()
             self.char.axeYpos += CROUCH_HEIGHT
             print(f"{self.char.name} crouches!")
 
     def stand(self):
-        if self.char.state == "crouching":
+        if self.char.state == "crouch":
             self.char.axeYpos -= CROUCH_HEIGHT
-        elif self.char.state == "jumping":
+        elif self.char.state == "jump":
             self.char.axeYpos += JUMP_HEIGHT
-        self.char.state = "standing"
+        self.char.state = "stand"
         self.char.update_hitbox()
 
         print(f"{self.char.name} stands up")

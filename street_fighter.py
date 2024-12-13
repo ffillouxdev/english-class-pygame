@@ -65,7 +65,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
+    
     # Touches
     keys = pygame.key.get_pressed()
 

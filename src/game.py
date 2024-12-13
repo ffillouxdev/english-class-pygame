@@ -21,9 +21,6 @@ class Game:
 
         spriteFolder = SPRITE_FOLDER + "Ryu"
 
-
-        self.player1 = Character("Player 1", 100, SCREEN_HEIGHT//2, spriteFolder)
-
         keyBindingPLayer1 = {
             "up" : pygame.K_z,
             "down" : pygame.K_s,
@@ -37,7 +34,12 @@ class Game:
             "left" : pygame.K_LEFT,
             "right" : pygame.K_RIGHT
         }
+        
+        #Initialize the 2 players
+        self.player1 = Character("Player 1", 100, SCREEN_HEIGHT//2, spriteFolder)
         self.player2 = Character("Player 2", SCREEN_WIDTH * 0.8, SCREEN_HEIGHT//2, spriteFolder)
+
+        #Utiliser les action genre comme : if up : self.player1.jump()
 
         # Initialize health bars
         self.player1_health_bar = HealthBar(self.player1, 50, 50, 400, 50)
@@ -121,6 +123,7 @@ class Game:
             # Determine if Player 2 should flip to face Player 1
             flip_player2 = self.player2.axeXpos > self.player1.axeXpos
 
+            action = Action(self.player1, "up")
             # Draw characters with their animations
             self.player1.draw(self.screen)
             self.player2.draw(self.screen, flip=flip_player2)
