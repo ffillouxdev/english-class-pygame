@@ -5,10 +5,22 @@ JUMP_HEIGHT = 10
 CROUCH_HEIGHT = 10
 
 from character import Character
+import pygame
 
 class Action:
-    def __init__(self, character: Character):
+    def __init__(self, character: Character, action):
         self.char = character
+        self.action = action
+    
+    def keyHandling(self):
+        if self.action == "up":
+            self.jump()
+        elif self.action == "down":
+            self.crouch()
+        elif self.action == "left":
+            self.forward()
+        elif self.action == "right":
+            self.backward()
 
     def forward(self):
         self.char.axeXpos += FORWARD_SPEED
@@ -61,3 +73,5 @@ class Action:
         else:
             print(f"{self.char.name} got hit!")
             return True  # Hit lands
+
+        

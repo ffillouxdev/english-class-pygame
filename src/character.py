@@ -11,6 +11,14 @@ class Character:
         self.width = 150  # Width of the character
         self.height = 300  # Default height
         self.hitbox = pygame.Rect(x, y, self.width, self.height)  # Hitbox
+        # Dictionnaire pour mapper les touches aux actions
+        key_action_map = {
+            pygame.K_RIGHT: self.forward,
+            pygame.K_LEFT: self.backward,
+            pygame.K_UP: self.jump,
+            pygame.K_DOWN: self.crouch,
+            pygame.K_SPACE: self.stand
+        }
 
         # Only load the idle sprites
         self.sprites = {
@@ -41,8 +49,6 @@ class Character:
             print(f"No images found in {folderPath}")
         return images
 
-
-
     def update_hitbox(self):
         """Update the hitbox according to the character's position."""
         self.hitbox.topleft = (self.axeXpos, self.axeYpos)
@@ -68,9 +74,6 @@ class Character:
         self.update_hitbox()
         pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 2)  # Draw the hitbox in red
 
-
-
-
     def update_animation(self):
         """Update the animation frames."""
         self.animation_counter += 1
@@ -80,3 +83,5 @@ class Character:
             self.current_index += 1
             if self.current_index >= len(self.current_sprite_list):
                 self.current_index = 0  # Loop back to the first frame
+
+    
