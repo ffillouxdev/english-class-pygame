@@ -7,14 +7,20 @@ class Character:
         self.axeYpos = y
         self.health = 100
         self.name = name
-        self.state = "standing"
+        self.state = "stand"
         self.width = 150  # Width of the character
         self.height = 300  # Default height
         self.hitbox = pygame.Rect(x, y, self.width, self.height)  # Hitbox
 
         # Only load the idle sprites
         self.sprites = {
-            "standing": self.load_sprites(sprite_folder + "/idle/final")
+            "stand": self.load_sprites(sprite_folder + "/idle/final"),
+            "jump" : self.load_sprites(sprite_folder + "/jump/final"),
+            "walk" : self.load_sprites(sprite_folder + "/walk/final"),
+            "ko": self.load_sprites(sprite_folder + "/ko/final"),
+            "leftPunch" : self.load_sprites(sprite_folder + "/leftPunch/final"),
+            "lowKick" : self.load_sprites(sprite_folder + "/lowKick/final"),
+            "crouch" : self.load_sprites(sprite_folder + "/crouch/final")
         }
 
         self.current_sprite_list = self.sprites[self.state]
@@ -67,7 +73,6 @@ class Character:
 
         self.update_hitbox()
         pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 2)  # Draw the hitbox in red
-
 
 
 
