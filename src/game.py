@@ -23,6 +23,20 @@ class Game:
 
 
         self.player1 = Character("Player 1", 100, SCREEN_HEIGHT//2, spriteFolder)
+
+        keyBindingPLayer1 = {
+            "up" : pygame.K_z,
+            "down" : pygame.K_s,
+            "left" : pygame.K_q,
+            "right" : pygame.K_d
+        }
+
+        keyBindingPlayer2 = {
+            "up" : pygame.K_UP,
+            "down" : pygame.K_DOWN,
+            "left" : pygame.K_LEFT,
+            "right" : pygame.K_RIGHT
+        }
         self.player2 = Character("Player 2", SCREEN_WIDTH * 0.8, SCREEN_HEIGHT//2, spriteFolder)
 
         # Initialize health bars
@@ -128,7 +142,5 @@ class Game:
             # Update the display
             pygame.display.flip()
             self.clock.tick(FPS)
-
-
 
         pygame.quit()

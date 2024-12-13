@@ -24,6 +24,7 @@ class Action:
 
     def forward(self):
         self.char.axeXpos += FORWARD_SPEED
+        self.char.state = ""
         print(f"{self.char.name} has moved forward")
 
     def backward(self):
