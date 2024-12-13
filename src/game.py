@@ -1,6 +1,6 @@
 import pygame
 from PIL import Image  # Pillow for GIF handling
-from .constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
+from .constants import *
 from .counter import Counter
 from .character import *
 from .healthBar import *
@@ -19,17 +19,18 @@ class Game:
         self.counter = Counter(99)
         self.clock = pygame.time.Clock()
 
+        spriteFolder = SPRITE_FOLDER + "Ryu"
 
 
-        self.player1 = Character("Player 1", 200, SCREEN_HEIGHT - 100)
-        self.player2 = Character("Player 2", SCREEN_WIDTH - 250, SCREEN_HEIGHT - 100)
+        self.player1 = Character("Player 1", 100, SCREEN_HEIGHT//2, spriteFolder)
+        self.player2 = Character("Player 2", SCREEN_WIDTH * 0.8, SCREEN_HEIGHT//2, spriteFolder)
 
         # Initialize health bars
-        self.player1_health_bar = HealthBar(self.player1, 50, 50, 200, 20)
-        self.player2_health_bar = HealthBar(self.player2, SCREEN_WIDTH - 250, 50, 200, 20)
+        self.player1_health_bar = HealthBar(self.player1, 50, 50, 400, 50)
+        self.player2_health_bar = HealthBar(self.player2, SCREEN_WIDTH - 450 , 50, 400, 50)
 
         # Load GIF frames
-        self.gif_frames, self.gif_size = self.load_gif_frames("./assets/sprites/BackGround.gif")
+        self.gif_frames, self.gif_size = self.load_gif_frames("./assets/stages/fireHell.gif")
         self.current_frame = 0
         self.last_frame_update = pygame.time.get_ticks()  # Tracks the last frame update time
         self.frame_delay = 1000 // 10  # GIF frame rate (10 FPS)
@@ -37,6 +38,8 @@ class Game:
         # Counter update timing
         self.last_counter_update = pygame.time.get_ticks()  # Tracks the last counter update time
         self.counter_delay = 1000  # 1-second delay for the counter
+
+
 
     def load_gif_frames(self, file_path):
         """Load frames from a GIF using Pillow."""
@@ -65,12 +68,13 @@ class Game:
 
     def update_gif_frame(self):
         """Update the current GIF frame based on timing."""
-
         current_time = pygame.time.get_ticks()
-        
+
         if current_time - self.last_frame_update >= self.frame_delay:
             self.current_frame = (self.current_frame + 1) % len(self.gif_frames)
             self.last_frame_update = current_time
+
+
 
     def update_counter(self):
         """Update the counter based on timing."""
@@ -88,26 +92,43 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
 
-            # Update the GIF frame and counter independently
+            # Update GIF frame and counter
             self.update_gif_frame()
             self.update_counter()
 
-            # Draw the animated background
+            # Draw the background first
             background = self.gif_frames[self.current_frame]
             self.screen.blit(background, (0, 0))
 
-            # Display the counter
-            font = pygame.font.Font(None, 74)
-            text = font.render(str(self.counter.get_count()), True, (255, 255, 255))
-            text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, 100))
-            self.screen.blit(text, text_rect.topleft)
+            # Draw characters
+            self.player1.update_animation()
+            self.player2.update_animation()
+
+            # Determine if Player 2 should flip to face Player 1
+            flip_player2 = self.player2.axeXpos > self.player1.axeXpos
+
+            # Draw characters with their animations
+            self.player1.draw(self.screen)
+            self.player2.draw(self.screen, flip=flip_player2)
 
             # Draw health bars
             self.player1_health_bar.draw(self.screen)
             self.player2_health_bar.draw(self.screen)
 
+            # Draw hitboxes
+            self.player1.draw_hitbox(self.screen)
+            self.player2.draw_hitbox(self.screen)
+
+            # Render the counter on screen
+            font = pygame.font.Font(None, 74)
+            text = font.render(str(self.counter.get_count()), True, (255, 255, 255))
+            text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, 80))
+            self.screen.blit(text, text_rect.topleft)
+
             # Update the display
             pygame.display.flip()
             self.clock.tick(FPS)
+
+
 
         pygame.quit()

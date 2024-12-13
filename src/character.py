@@ -1,81 +1,82 @@
 import pygame
+import os
 
 class Character:
-    def __init__(self, name, x, y):
+    def __init__(self, name, x, y, sprite_folder):
         self.axeXpos = x
         self.axeYpos = y
         self.health = 100
         self.name = name
         self.state = "standing"
-        self.width = 50  # Largeur du personnage
-        self.height = 100  # Hauteur par défaut
+        self.width = 150  # Width of the character
+        self.height = 300  # Default height
         self.hitbox = pygame.Rect(x, y, self.width, self.height)  # Hitbox
 
-    def forward(self):
-        self.axeXpos += 10
-        print(f"{self.name} has moved forward")
+        # Only load the idle sprites
+        self.sprites = {
+            "standing": self.load_sprites(sprite_folder + "/idle/final")
+        }
 
-    def backward(self):
-        self.axeXpos -= 10
+        self.current_sprite_list = self.sprites[self.state]
+        self.current_index = 0
+        self.animation_speed = 13  # Speed of animation frames
+        self.animation_counter = 0
 
-    def jump(self):
-        if self.state == "standing":
-            self.state = "jumping"
+    def load_sprites(self, folderPath):
+        images = []
+        if not os.path.exists(folderPath):
+            print(f"ERROR: Folder {folderPath} does not exist!")
+            return []
 
-    def crouch(self):
-        if self.state == "standing":
-            self.state = "crouching"
+        for file in sorted(os.listdir(folderPath)):
+            if file.endswith('.png'):
+                try:
+                    img = pygame.image.load(os.path.join(folderPath, file)).convert_alpha()
+                    images.append(img)
+                    print(f"Loaded {file}")
+                except pygame.error as e:
+                    print(f"Failed to load {file}: {e}")
 
-    def stand(self):
-        self.state = "standing"
+        if len(images) == 0:
+            print(f"No images found in {folderPath}")
+        return images
 
-    def hurt(self, damage):
-        self.health = max(0, self.health - damage)
+
 
     def update_hitbox(self):
-        """Met à jour la hitbox en fonction de l'état et de la position."""
-
-        if self.state == "crouching":
-            self.hitbox.height = 50  # Crouching réduit la hauteur
-        
-        elif self.state == "jumping":
-            self.hitbox.height = 100
-        
+        """Update the hitbox according to the character's position."""
         self.hitbox.topleft = (self.axeXpos, self.axeYpos)
 
-    def take_hit(self, attack_type):
-        """
-        Vérifie si un coup atteint le personnage en fonction de son état.
-        :param attack_type: "high" pour un coup haut, "low" pour un coup bas.
-        """
-
-        if attack_type == "high" and self.state == "crouching":
-            print(f"{self.name} esquive un coup haut en étant accroupi!")
-            return False  # Coup esquivé
-        
-        elif attack_type == "low" and self.state == "jumping":
-            print(f"{self.name} esquive un coup bas en sautant!")
-            return False  # Coup esquivé
-        
-        else:
-            damage = 10  # Exemple de dégâts
-            self.hurt(damage)
-            print(f"{self.name} reçoit un coup et perd {damage} points de vie.")
-
-            return True  # Coup réussi
-
-    def draw_health_bar(self, screen, x, y):
-        bar_width = 200
-        bar_height = 20
-        health_ratio = self.health / 100
-        current_width = bar_width * health_ratio
-
-        pygame.draw.rect(screen, (100, 100, 100), (x, y, bar_width, bar_height))  # Barre de fond
-        pygame.draw.rect(screen, (0, 255, 0), (x, y, current_width, bar_height))  # Barre de santé
-        pygame.draw.rect(screen, (255, 255, 255), (x, y, bar_width, bar_height), 2)  # Contour
-
-    def draw(self, screen):
-        """Dessine le personnage et sa hitbox."""
-        
+    def draw_hitbox(self, screen):
+        """Draw the hitbox on the screen for debugging purposes."""
         self.update_hitbox()
-        pygame.draw.rect(screen, (255,0,0), self.hitbox, 2)  # Dessine la hitbox (en rouge)
+        pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 2)
+
+    def draw(self, screen, flip=False):
+        """Draw the character and its hitbox."""
+        if self.current_sprite_list:
+            current_sprite = self.current_sprite_list[self.current_index]
+
+            if flip:
+                current_sprite = pygame.transform.flip(current_sprite, True, False)
+            
+            # Scale the sprite to match the hitbox dimensions
+            current_sprite = pygame.transform.scale(current_sprite, (self.hitbox.width, self.hitbox.height))
+
+            screen.blit(current_sprite, (self.axeXpos, self.axeYpos))
+
+        self.update_hitbox()
+        pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 2)  # Draw the hitbox in red
+
+
+
+
+    def update_animation(self):
+        """Update the animation frames."""
+        self.animation_counter += 1
+
+        if self.animation_counter >= self.animation_speed:
+            self.animation_counter = 0
+            self.current_index += 1
+            if self.current_index >= len(self.current_sprite_list):
+                self.current_index = 0  # Loop back to the first frame
