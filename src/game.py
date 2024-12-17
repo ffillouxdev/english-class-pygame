@@ -21,25 +21,27 @@ class Game:
 
         spriteFolder = SPRITE_FOLDER + "Ryu"
 
-        keyBindingPLayer1 = {
+        self.key_binding_player1 = {
             "up" : pygame.K_z,
             "down" : pygame.K_s,
             "left" : pygame.K_q,
-            "right" : pygame.K_d
+            "right" : pygame.K_d,
+            "lowKick" : pygame.K_u,
+            "leftPunch" : pygame.K_i
         }
 
-        keyBindingPlayer2 = {
+        self.key_binding_player2 = {
             "up" : pygame.K_UP,
             "down" : pygame.K_DOWN,
             "left" : pygame.K_LEFT,
-            "right" : pygame.K_RIGHT
-        }
+            "right" : pygame.K_RIGHT,
+            "lowKick" : pygame.K_p,
+            "leftPunch" : pygame.K_o
+        } #maybe create a key binding option in the game itself? (super easy)
         
         #Initialize the 2 players
         self.player1 = Character("Player 1", 100, SCREEN_HEIGHT//2, spriteFolder)
         self.player2 = Character("Player 2", SCREEN_WIDTH * 0.8, SCREEN_HEIGHT//2, spriteFolder)
-
-        #Utiliser les action genre comme : if up : self.player1.jump()
 
         # Initialize health bars
         self.player1_health_bar = HealthBar(self.player1, 50, 50, 400, 50)
@@ -98,15 +100,70 @@ class Game:
         if current_time - self.last_counter_update >= self.counter_delay:
             if self.counter.get_count() > 0:
                 self.counter.decrement()
-            else:
+            else: # to do : look for the winner then annonce it in the main page
                 self.counter.reset()
             self.last_counter_update = current_time
+
+    def handle_player_action(self, player: Character, action):
+        """Handles actions for a player based on the keybinding action."""
+        if action == "up":
+            player.jump()
+        elif action == "down":
+            player.crouch()
+        elif action == "left":
+            player.backward()
+        elif action == "right":
+            player.forward()
+        elif action == "lowKick":
+            player.lowKick()
+
+            #BIG BIG BIG NONSENS DON'T WORRY ! ----------------------------------
+
+            #if the attack touched the player (his hit box then)
+            if(player == self.player1):
+                if(self.player2.take_hit("low")):
+                    self.player2.hurt(0.1)
+            if(self.player1.take_hit("low")):
+                self.player1.hurt(0.1)
+
+
+            #----------------------------------------------------------------------
+            
+        elif action == "leftPunch":
+            player.leftPunch()
+
+        player.update_animation()
+
+
+
 
     def run(self):
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                
+                #this is for the actions that goes once, like punching kicking, jumping, it verify if the key is pressed and then does it one time
+                if event.type == pygame.KEYDOWN:
+                    for action, input in self.key_binding_player1.items():
+                        if event.key == input:
+                            self.handle_player_action(self.player1, action)
+                    
+                    for action, input in self.key_binding_player2.items():
+                        if event.key == input:
+                            self.handle_player_action(self.player2, action)
+
+            keyPressed = pygame.key.get_pressed() #a list of true or false of all keys (true for : key is pressed; false for : key is not pressed)
+
+            for action, input in self.key_binding_player1.items():
+                if keyPressed[input] : #if the key is pressed or not (true while the key is pressed by the way)
+                    self.handle_player_action(self.player1,action)
+
+            for action, input in self.key_binding_player2.items():
+                if keyPressed[input] :
+                    self.handle_player_action(self.player2,action)
+
+            
 
             # Update GIF frame and counter
             self.update_gif_frame()
@@ -123,7 +180,6 @@ class Game:
             # Determine if Player 2 should flip to face Player 1
             flip_player2 = self.player2.axeXpos > self.player1.axeXpos
 
-            action = Action(self.player1, "up")
             # Draw characters with their animations
             self.player1.draw(self.screen)
             self.player2.draw(self.screen, flip=flip_player2)

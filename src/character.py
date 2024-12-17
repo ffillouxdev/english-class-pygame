@@ -1,36 +1,32 @@
 import pygame
 import os
-
-# Define constants for movement and actions
-FORWARD_SPEED = 10
-BACKWARD_SPEED = 10
-JUMP_HEIGHT = 10
-CROUCH_HEIGHT = 10
+from .constants import *
 
 class Character:
     def __init__(self, name, x, y, sprite_folder):
+        self.name = name
+
         self.axeXpos = x
         self.axeYpos = y
+        self.velocity_y = 0
+        
         self.health = 100
-        self.name = name
         self.state = "stand"
+        
         self.width = 150  # Width of the character
         self.height = 300  # Default height
+
+        self.min = y #the minimum axeY level
+
+        
         self.hitbox = pygame.Rect(x, y, self.width, self.height)  # Hitbox
 
         # Only load the idle sprites
-        self.sprites = {
-            "stand": self.load_sprites(sprite_folder + "/idle/final"),
-            "jump" : self.load_sprites(sprite_folder + "/jump/final"),
-            "walk" : self.load_sprites(sprite_folder + "/walk/final"),
-            "ko": self.load_sprites(sprite_folder + "/ko/final"),
-            "leftPunch" : self.load_sprites(sprite_folder + "/leftPunch/final"),
-            "lowKick" : self.load_sprites(sprite_folder + "/lowKick/final"),
-            "crouch" : self.load_sprites(sprite_folder + "/crouch/final")
-        }
+        self.sprites = self.load_all_sprites(sprite_folder)
 
         self.current_sprite_list = self.sprites[self.state]
         self.current_index = 0
+
         self.animation_speed = 13  # Speed of animation frames
         self.animation_counter = 0
 
@@ -53,9 +49,21 @@ class Character:
             print(f"No images found in {folderPath}")
         return images
 
+    def load_all_sprites(self, folderPath):
+
+        return {
+            "stand": self.load_sprites(folderPath + "/idle/final"),
+            "jump" : self.load_sprites(folderPath + "/jump/final"),
+            "walk" : self.load_sprites(folderPath + "/walk/final"),
+            "ko": self.load_sprites(folderPath + "/ko/final"),
+            "leftPunch" : self.load_sprites(folderPath + "/leftPunch/final"),
+            "lowKick" : self.load_sprites(folderPath + "/lowKick/final"),
+            "crouch" : self.load_sprites(folderPath + "/crouch/final")
+        }
+
     def update_hitbox(self):
         """Update the hitbox according to the character's position."""
-        self.hitbox.topleft = (self.axeXpos, self.axeYpos)
+        self.hitbox.topleft = (self.axeXpos, self.axeYpos ) #perhaps : - crouch_Height or self.crouch
 
     def draw_hitbox(self, screen):
         """Draw the hitbox on the screen for debugging purposes."""
@@ -82,13 +90,47 @@ class Character:
 
     def update_animation(self):
         """Update the animation frames."""
-        self.animation_counter += 1
+        # Update the sprite list if the state changes
+        if self.current_sprite_list != self.sprites[self.state]:
+            self.current_sprite_list = self.sprites[self.state]
+            self.current_index = 0  # Reset the animation frame to the start
 
+        # Increment animation frame
+        self.animation_counter += 1
         if self.animation_counter >= self.animation_speed:
             self.animation_counter = 0
             self.current_index += 1
             if self.current_index >= len(self.current_sprite_list):
-                self.current_index = 0  # Loop back to the first frame
+                # Loop back to the first frame
+                if self.state in ["walk", "stand"]:
+                    self.current_index = 0  # Loop for continuous actions
+                else:
+                    self.current_index = len(self.current_sprite_list) - 1  # Freeze on the last frame for one-time actions
+                
+                self.stand()
+
+        self.apply_gravity()
+
+    def apply_gravity(self):
+        #I'm struggling in the gravity thing
+        #if bla bla
+        self.velocity_y += GRAVITY
+        #then
+        self.axeYpos += self.velocity_y
+
+        # Prevent falling below spawn height
+        if self.axeYpos > self.min:
+            self.axeYpos = self.min
+            self.velocity_y = 0
+            if self.state == "jump":
+                self.state = "stand"
+                self.current_sprite_list = self.sprites[self.state]
+                self.current_index = 0
+
+        self.update_hitbox()
+
+
+    #------------------------ACTIONS------------------#
 
     def forward(self):
         self.axeXpos += FORWARD_SPEED
@@ -111,12 +153,12 @@ class Character:
         if self.state != "crouch":  # Prevent repeated crouch states
             self.state = "crouch"
             self.update_hitbox()
-            self.axeYpos += CROUCH_HEIGHT
+            
             print(f"{self.name} crouches!")
 
     def stand(self):
         if self.state == "crouch":
-            self.axeYpos -= CROUCH_HEIGHT
+            pass #for now
         elif self.state == "jump":
             self.axeYpos += JUMP_HEIGHT
         self.state = "stand"
@@ -124,9 +166,27 @@ class Character:
 
         print(f"{self.name} stands up")
 
+    def leftPunch(self):
+        if self.state != "leftPunch":  # Prevent repeated actions; or maybe apply a cooldown
+            self.state = "leftPunch"
+            self.current_sprite_list = self.sprites[self.state]
+            self.current_index = 0
+            self.animation_counter = 0
+            self.update_hitbox()
+            print(f"{self.name} performs a punch!")
+
+    def lowKick(self):
+        if self.state != "lowKick":
+            self.state = "lowKick"
+            self.current_sprite_list = self.sprites[self.state]
+            self.current_index = 0
+            self.animation_counter = 0
+            self.update_hitbox()
+            print(f"{self.name} performs a kick!")
+
     def hurt(self, damage):
         self.health -= damage
-        print(f"{self.name} took {damage} damage")
+        print(f"{self.name} took {damage} damage") #maybe combine the method directly with take_hit?
 
     def take_hit(self, attack_type):
         """
