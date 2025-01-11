@@ -1,6 +1,6 @@
 import pygame
 import os
-from .constants import *
+from constants import *
 
 class Character:
     def __init__(self, name, x, y, sprite_folder):
@@ -13,13 +13,13 @@ class Character:
         self.health = 100
         self.state = "stand"
         
-        self.width = 150  # Width of the character
-        self.height = 300  # Default height
+        self.width = 150 
+        self.height = 300
 
         self.min = y #the minimum axeY level
 
         
-        self.hitbox = pygame.Rect(x, y, self.width, self.height)  # Hitbox
+        self.hitbox = pygame.Rect(x, y, self.width, self.height)
 
         # Only load the idle sprites
         self.sprites = self.load_all_sprites(sprite_folder)
@@ -29,6 +29,9 @@ class Character:
 
         self.animation_speed = 13  # Speed of animation frames
         self.animation_counter = 0
+
+        self.attack_damage = 1  # Set an example damage value
+
 
     def load_sprites(self, folderPath):
         images = []
@@ -84,7 +87,6 @@ class Character:
             screen.blit(current_sprite, (self.axeXpos, self.axeYpos))
 
         self.update_hitbox()
-        pygame.draw.rect(screen, (255, 0, 0), self.hitbox, 2)  # Draw the hitbox in red
 
 
 
@@ -187,6 +189,14 @@ class Character:
     def hurt(self, damage):
         self.health -= damage
         print(f"{self.name} took {damage} damage") #maybe combine the method directly with take_hit?
+
+    def take_damage(self, damage):
+            """Apply damage to the character."""
+            self.health -= damage
+            if self.health < 0:
+                self.health = 0
+
+    
 
     def take_hit(self, attack_type):
         """
