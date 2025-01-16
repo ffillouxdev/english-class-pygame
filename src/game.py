@@ -6,6 +6,8 @@ from character import *
 from healthBar import *
 from main import *
 
+backgroundPath = "../assets/stages/fireHell.gif"
+
 def draw_button(screen, text, x, y, width, height, color):
     """Draw a button on the screen."""
     button_rect = pygame.Rect(x, y, width, height)
@@ -122,6 +124,7 @@ class Game:
         elif action == "leftPunch":
             player.leftPunch()
 
+        play_sound(action)
         player.update_animation()
 
         # Check for collision after the attack is executed
@@ -154,6 +157,7 @@ class Game:
             self.declare_winner("Player 2")  # Player 2 wins when Player 1 dies
         elif self.player2.health <= 0:
             self.declare_winner("Player 1")  # Player 1 wins when Player 2 dies
+        play_sound("gameOver")
 
 
 
@@ -168,6 +172,7 @@ class Game:
                 winner = "Player 2"
             else:
                 winner = "Draw"
+            play_sound_spe("youWin")
 
         # Display the winner on the screen
         winner_text = font.render(f"{winner} Wins!", True, (255, 255, 255))
@@ -227,6 +232,8 @@ class Game:
 
 
     def run(self):
+        play_sound_spe("start")
+        play_sound_spe("fight")
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

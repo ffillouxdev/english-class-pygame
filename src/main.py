@@ -5,6 +5,19 @@ import os
 from constants import *
 
 backgroundPath = "../assets/stages/fireHell.gif"
+jump = "../assets/soundEffects/jump.wav"
+walk = "../assets/soundEffects/walk.wav"
+kick = "../assets/soundEffects/kick.wav"
+punch = "../assets/soundEffects/punch.wav"
+down = "../assets/soundEffects/down.wav"
+
+try:
+    pygame.mixer.init()
+    print("Mixer initialized successfully")
+except pygame.error as e:
+    print(f"Error initializing mixer: {e}")
+
+pygame.init()
 
 key_binding_player1 = {
     "up": pygame.K_z,
@@ -12,7 +25,7 @@ key_binding_player1 = {
     "left": pygame.K_q,
     "right": pygame.K_d,
     "lowKick": pygame.K_u,
-    "leftPunch": pygame.K_i
+    "leftPunch": pygame.K_i,
 }
 
 key_binding_player2 = {
@@ -21,15 +34,32 @@ key_binding_player2 = {
     "left": pygame.K_LEFT,
     "right": pygame.K_RIGHT,
     "lowKick": pygame.K_p,
-    "leftPunch": pygame.K_o
+    "leftPunch": pygame.K_o,
 }
 
-pygame.init()
+sound_effects = {
+    "up": pygame.mixer.Sound(jump),
+    # "down": pygame.mixer.Sound(down),
+    "left": pygame.mixer.Sound(walk),
+    "right": pygame.mixer.Sound(walk),
+    "lowKick": pygame.mixer.Sound(kick),
+    "leftPunch": pygame.mixer.Sound(punch),
+    "youWin": pygame.mixer.Sound("../assets/soundEffects/youwin.wav"),
+    "youLose": pygame.mixer.Sound("../assets/soundEffects/youlose.wav"),
+    "start": pygame.mixer.Sound("../assets/soundEffects/start.wav"),
+    "fight": pygame.mixer.Sound("../assets/soundEffects/fight.wav"),
+}
+
+# Set volume for all sounds
+for sound in sound_effects.values():
+    sound.set_volume(1.0)
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Game Menu")
 
 font = pygame.font.Font(None, 36)
 button_font = pygame.font.Font(None, 28)
+
 
 def draw_text(text, font, color, surface, x, y):
     """Function to render text on screen."""
@@ -37,15 +67,17 @@ def draw_text(text, font, color, surface, x, y):
     text_rect = text_surface.get_rect(center=(x, y))
     surface.blit(text_surface, text_rect)
 
+
 def draw_button(surface, text, x, y, width, height, color, highlight=False):
     """Draw a button with optional highlighting."""
     button_rect = pygame.Rect(x - width // 2, y - height // 2, width, height)
     if highlight:
-        pygame.draw.rect(surface, (255, 255, 0), button_rect) 
+        pygame.draw.rect(surface, (255, 255, 0), button_rect)
     else:
         pygame.draw.rect(surface, color, button_rect)
     draw_text(text, button_font, (0, 0, 0), surface, x, y)
     return button_rect
+
 
 def show_main_menu():
     """Display the main menu with options."""
@@ -58,50 +90,93 @@ def show_main_menu():
         pygame.draw.line(gradient, color, (0, i), (SCREEN_WIDTH, i))
 
     screen.blit(gradient, (0, 0))
-    
-    draw_text("Main Menu : Resberry-fight", font, (255, 255, 255), screen, SCREEN_WIDTH // 2, 50)
 
-    start_button = draw_button(screen, "Start Game", SCREEN_WIDTH // 2, 150, 200, 50, (0, 255, 0))
-    edit_button = draw_button(screen, "Edit Key Bindings", SCREEN_WIDTH // 2, 250, 200, 50, (0, 255, 0))
-    map_button = draw_button(screen, "Choose Map", SCREEN_WIDTH // 2, 350, 200, 50, (0, 255, 0))
-    quit_button = draw_button(screen, "Quit Game", SCREEN_WIDTH // 2, 450, 200, 50, (255, 0, 0))
+    draw_text(
+        "Main Menu : Resberry-fight",
+        font,
+        (255, 255, 255),
+        screen,
+        SCREEN_WIDTH // 2,
+        50,
+    )
+
+    start_button = draw_button(
+        screen, "Start Game", SCREEN_WIDTH // 2, 150, 200, 50, (0, 255, 0)
+    )
+    edit_button = draw_button(
+        screen, "Edit Key Bindings", SCREEN_WIDTH // 2, 250, 200, 50, (0, 255, 0)
+    )
+    map_button = draw_button(
+        screen, "Choose Map", SCREEN_WIDTH // 2, 350, 200, 50, (0, 255, 0)
+    )
+    quit_button = draw_button(
+        screen, "Quit Game", SCREEN_WIDTH // 2, 450, 200, 50, (255, 0, 0)
+    )
 
     pygame.display.flip()
     return start_button, edit_button, map_button, quit_button
 
+
 def show_key_binding_screen():
     """Display the key binding screen for both players."""
-    screen.fill((0, 0, 0))  
+    screen.fill((0, 0, 0))
     draw_text("Edit Key Bindings", font, (255, 255, 255), screen, SCREEN_WIDTH // 2, 50)
 
     buttons_player1 = {}
     actions_player1 = list(key_binding_player1.keys())
     y_offset = 100
-    
+
     for i, action in enumerate(actions_player1):
         y_pos = y_offset + i * 70
         button_text = pygame.key.name(key_binding_player1[action])
-        button = draw_button(screen, button_text, SCREEN_WIDTH // 4 + 150, y_pos, 100, 40, (0, 255, 0))
+        button = draw_button(
+            screen, button_text, SCREEN_WIDTH // 4 + 150, y_pos, 100, 40, (0, 255, 0)
+        )
         buttons_player1[action] = button
         label_text = action.capitalize()
-        draw_text(label_text, button_font, (255, 255, 255), screen, SCREEN_WIDTH // 4 - 100, y_pos)
+        draw_text(
+            label_text,
+            button_font,
+            (255, 255, 255),
+            screen,
+            SCREEN_WIDTH // 4 - 100,
+            y_pos,
+        )
 
     buttons_player2 = {}
     actions_player2 = list(key_binding_player2.keys())
-    
+
     y_offset = 100
     for i, action in enumerate(actions_player2):
         y_pos = y_offset + i * 70
         button_text = pygame.key.name(key_binding_player2[action])
-        button = draw_button(screen, button_text, 3 * SCREEN_WIDTH // 4 + 150, y_pos, 100, 40, (0, 255, 0))
+        button = draw_button(
+            screen,
+            button_text,
+            3 * SCREEN_WIDTH // 4 + 150,
+            y_pos,
+            100,
+            40,
+            (0, 255, 0),
+        )
         buttons_player2[action] = button
         label_text = action.capitalize()
-        draw_text(label_text, button_font, (255, 255, 255), screen, 3 * SCREEN_WIDTH // 4 - 100, y_pos)
+        draw_text(
+            label_text,
+            button_font,
+            (255, 255, 255),
+            screen,
+            3 * SCREEN_WIDTH // 4 - 100,
+            y_pos,
+        )
 
-    back_button = draw_button(screen, "Back", SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100, 200, 50, (255, 255, 0))
+    back_button = draw_button(
+        screen, "Back", SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100, 200, 50, (255, 255, 0)
+    )
 
     pygame.display.flip()
     return buttons_player1, buttons_player2, back_button
+
 
 def change_key_binding(player, action):
     """Wait for the player to press a key to change the binding."""
@@ -113,15 +188,19 @@ def change_key_binding(player, action):
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
-                key_binding = key_binding_player1 if player == 1 else key_binding_player2
+                key_binding = (
+                    key_binding_player1 if player == 1 else key_binding_player2
+                )
                 key_binding[action] = event.key
                 return pygame.key.name(event.key)
+
 
 def start_game(backgroundPath):
     """Start the game with the chosen background."""
     print(f"Starting game with background: {backgroundPath}")
     game = Game(key_binding_player1, key_binding_player2, backgroundPath)
     game.run()
+
 
 def choose_map():
     """Allow the user to choose a map."""
@@ -145,7 +224,10 @@ def choose_map():
     map_height = 120
     horizontal_spacing = 20
     vertical_spacing = 20
-    x_offset = (SCREEN_WIDTH - (max_columns * map_width + (max_columns - 1) * horizontal_spacing)) // 2
+    x_offset = (
+        SCREEN_WIDTH
+        - (max_columns * map_width + (max_columns - 1) * horizontal_spacing)
+    ) // 2
     y_offset = 150
 
     for i, map_name in enumerate(maps):
@@ -154,29 +236,71 @@ def choose_map():
 
         row = i // max_columns
         col = i % max_columns
-        screen.blit(map_preview, (x_offset + col * (map_width + horizontal_spacing), y_offset + row * (map_height + vertical_spacing)))
+        screen.blit(
+            map_preview,
+            (
+                x_offset + col * (map_width + horizontal_spacing),
+                y_offset + row * (map_height + vertical_spacing),
+            ),
+        )
 
-        map_button = draw_button(screen, "", x_offset + col * (map_width + horizontal_spacing) + map_width // 2,
-                                 y_offset + row * (map_height + vertical_spacing) + map_height + 20, 100, 40, (0, 255, 0))
+        map_button = draw_button(
+            screen,
+            "",
+            x_offset + col * (map_width + horizontal_spacing) + map_width // 2,
+            y_offset + row * (map_height + vertical_spacing) + map_height + 20,
+            100,
+            40,
+            (0, 255, 0),
+        )
         map_buttons[map_name] = map_button
 
-    back_button = draw_button(screen, "Back", SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100, 200, 50, (255, 255, 0))
+    back_button = draw_button(
+        screen, "Back", SCREEN_WIDTH // 2, SCREEN_HEIGHT - 100, 200, 50, (255, 255, 0)
+    )
 
     pygame.display.flip()
     return map_buttons, maps, back_button
 
+
+def play_sound(action):
+    """Play the sound effect associated with the given action."""
+    if action in sound_effects:
+        print(f"Playing sound for action: {action}")
+        sound_effects[action].play()
+    else:
+        print(f"No sound found for action: {action}")
+
+def play_sound_spe(sound):
+    """Play the sound effect associated with the given action."""
+    if sound is "youWin":
+        print(f"Playing sound for action: {sound}")
+        sound_effects[sound].play()
+    elif sound is "youLose":
+        print(f"Playing sound for action: {sound}")
+        sound_effects[sound].play()
+    elif sound is "start":
+        print(f"Playing sound for action: {sound}")
+        sound_effects[sound].play()
+    elif sound is "fight":
+        print(f"Playing sound for action: {sound}")
+        sound_effects[sound].play()
+        
 def main():
     """Main function to run the menu and handle choices."""
-    from game import Game
+
     running = True
     in_key_binding = False
     in_map_select = False
     global backgroundPath
 
     while running:
+        for sound in sound_effects.values():
+            sound.set_volume(1.0)
+            
         if not in_key_binding and not in_map_select:
             start_button, edit_button, map_button, quit_button = show_main_menu()
-        
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -192,6 +316,14 @@ def main():
                     elif quit_button.collidepoint(event.pos):
                         running = False
 
+                if event.type == pygame.KEYDOWN:
+                    for action, key in key_binding_player1.items():
+                        if event.key == key:
+                            play_sound(action)
+                    for action, key in key_binding_player2.items():
+                        if event.key == key:
+                            play_sound(action)
+
         elif in_map_select:
             map_buttons, maps, back_button = choose_map()
 
@@ -204,11 +336,13 @@ def main():
                     for map_name, button in map_buttons.items():
                         if button.collidepoint(event.pos):
                             backgroundPath = os.path.join("../assets/stages", map_name)
-                            in_map_select = False  # Update backgroundPath and exit map select
+                            in_map_select = (
+                                False  # Update backgroundPath and exit map select
+                            )
 
                     if back_button.collidepoint(event.pos):
                         in_map_select = False
-        
+
         elif in_key_binding:
             buttons_player1, buttons_player2, back_button = show_key_binding_screen()
 
@@ -218,15 +352,33 @@ def main():
                     sys.exit()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    for action, button in buttons_player1.items():
+                    for i, (action, button) in enumerate(buttons_player1.items()):
                         if button.collidepoint(event.pos):
                             new_key = change_key_binding(1, action)
-                            button = draw_button(screen, new_key, SCREEN_WIDTH // 4 + 150, y_pos, 100, 40, (0, 255, 0))
+                            y_pos = 100 + i * 70
+                            buttons_player1[action] = draw_button(
+                                screen,
+                                new_key,
+                                SCREEN_WIDTH // 4 + 150,
+                                y_pos,
+                                100,
+                                40,
+                                (0, 255, 0),
+                            )
 
-                    for action, button in buttons_player2.items():
+                    for i, (action, button) in enumerate(buttons_player2.items()):
                         if button.collidepoint(event.pos):
                             new_key = change_key_binding(2, action)
-                            button = draw_button(screen, new_key, SCREEN_WIDTH // 4 + 150, y_pos, 100, 40, (0, 255, 0))
+                            y_pos = 100 + i * 70
+                            buttons_player2[action] = draw_button(
+                                screen,
+                                new_key,
+                                3 * SCREEN_WIDTH // 4 + 150,
+                                y_pos,
+                                100,
+                                40,
+                                (0, 255, 0),
+                            )
 
                     if back_button.collidepoint(event.pos):
                         in_key_binding = False
@@ -234,6 +386,7 @@ def main():
         pygame.display.update()
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()
