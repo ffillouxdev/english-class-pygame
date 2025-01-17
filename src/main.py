@@ -82,14 +82,13 @@ def draw_button(surface, text, x, y, width, height, color, highlight=False):
 def show_main_menu():
     """Display the main menu with options."""
     gradient = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-    for i in range(SCREEN_HEIGHT):
-        r = 0
-        g = min(100 + i // 6, 255)
-        b = min(200 + i // 4, 255)
-        color = (r, g, b)
-        pygame.draw.line(gradient, color, (0, i), (SCREEN_WIDTH, i))
-
-    screen.blit(gradient, (0, 0))
+    
+    # Load and scale the background image
+    background_image = pygame.image.load("../assets/maxresdefault.jpg")
+    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    
+    # Draw the background image
+    screen.blit(background_image, (0, 0))
 
     draw_text(
         "Main Menu : Resberry-fight",

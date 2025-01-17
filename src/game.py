@@ -215,7 +215,7 @@ class Game:
         self.player2.health = 100
         self.counter.reset()
         self.running = True
-        start_game(backgroundPath)  # Call the main game loop again
+        Game(self.key_binding_player1,self.key_binding_player2,backgroundPath)
 
     def return_to_main_menu(self):
         """Return to the main menu after a game is over."""
